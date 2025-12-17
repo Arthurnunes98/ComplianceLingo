@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { fetchComplianceNews, NewsData, NewsItem } from '../services/geminiService';
-import { Newspaper, ExternalLink, RefreshCw, Globe, AlertTriangle, TrendingUp, Info, Tag } from 'lucide-react';
+import { fetchComplianceNews, NewsData } from '../services/geminiService';
+import { Newspaper, ExternalLink, RefreshCw, Globe, AlertTriangle } from 'lucide-react';
 import Button from '../components/Button';
 
 const News: React.FC = () => {
@@ -26,24 +26,8 @@ const News: React.FC = () => {
     loadNews();
   }, []);
 
-  const getImpactColor = (impact: string) => {
-    switch (impact) {
-      case 'High': return 'bg-rose-100 text-rose-700 border-rose-200';
-      case 'Medium': return 'bg-amber-100 text-amber-700 border-amber-200';
-      default: return 'bg-slate-100 text-slate-600 border-slate-200';
-    }
-  };
-
-  const getCategoryColor = (category: string) => {
-      const c = category.toLowerCase();
-      if (c.includes('gdpr') || c.includes('privacy')) return 'text-purple-600 bg-purple-50';
-      if (c.includes('aml') || c.includes('money')) return 'text-emerald-600 bg-emerald-50';
-      if (c.includes('cyber') || c.includes('tech')) return 'text-blue-600 bg-blue-50';
-      return 'text-indigo-600 bg-indigo-50';
-  };
-
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-fade-in pb-12">
+    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-12">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-200 pb-6">
         <div>
@@ -68,22 +52,14 @@ const News: React.FC = () => {
 
       {/* Loading Skeletons */}
       {loading && !data && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-           {[1, 2, 3, 4, 5, 6].map(i => (
-             <div key={i} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm h-64 flex flex-col animate-pulse">
-                <div className="flex justify-between mb-4">
-                  <div className="h-6 w-20 bg-slate-100 rounded-full"></div>
-                  <div className="h-6 w-16 bg-slate-100 rounded-full"></div>
-                </div>
-                <div className="h-6 w-3/4 bg-slate-200 rounded mb-2"></div>
-                <div className="h-6 w-1/2 bg-slate-200 rounded mb-4"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-full bg-slate-100 rounded"></div>
-                  <div className="h-4 w-full bg-slate-100 rounded"></div>
-                  <div className="h-4 w-2/3 bg-slate-100 rounded"></div>
-                </div>
-             </div>
-           ))}
+        <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm space-y-4 animate-pulse">
+            <div className="h-8 w-1/3 bg-slate-100 rounded"></div>
+            <div className="h-4 w-full bg-slate-100 rounded"></div>
+            <div className="h-4 w-full bg-slate-100 rounded"></div>
+            <div className="h-4 w-2/3 bg-slate-100 rounded"></div>
+            <div className="h-8 w-1/4 bg-slate-100 rounded mt-8"></div>
+            <div className="h-4 w-full bg-slate-100 rounded"></div>
+            <div className="h-4 w-full bg-slate-100 rounded"></div>
         </div>
       )}
 
@@ -91,35 +67,10 @@ const News: React.FC = () => {
       {data && (
         <div className="space-y-10">
            
-           {/* News Grid */}
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {data.items.map((item: NewsItem, idx: number) => (
-                <div key={idx} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300 flex flex-col h-full group">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${getImpactColor(item.impact)}`}>
-                       {item.impact} Impact
-                    </span>
-                    <span className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${getCategoryColor(item.category)}`}>
-                       <Tag size={12} /> {item.category}
-                    </span>
-                  </div>
-                  
-                  <h3 className="text-lg font-bold text-slate-800 mb-3 leading-snug group-hover:text-indigo-700 transition-colors">
-                    {item.headline}
-                  </h3>
-                  
-                  <p className="text-slate-600 text-sm leading-relaxed mb-4 flex-1">
-                    {item.summary}
-                  </p>
-                  
-                  <div className="pt-4 border-t border-slate-50 flex items-center justify-between text-xs text-slate-400">
-                    <span className="flex items-center gap-1">
-                      <TrendingUp size={14} /> Analysis
-                    </span>
-                    <span className="font-mono">{item.dateContext}</span>
-                  </div>
-                </div>
-              ))}
+           <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+              <div className="prose prose-slate max-w-none whitespace-pre-wrap font-sans leading-relaxed text-slate-700">
+                {data.content}
+              </div>
            </div>
 
            {/* Sources Section */}

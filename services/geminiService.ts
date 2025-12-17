@@ -144,16 +144,8 @@ export const generateQuizFromNotes = async (notes: Note[], difficulty: 'Easy' | 
   return questions.map((q, idx) => ({ ...q, id: `q-${Date.now()}-${idx}` }));
 };
 
-export interface NewsItem {
-  headline: string;
-  summary: string;
-  category: string; // e.g. "GDPR", "AML", "Cybersecurity"
-  impact: 'High' | 'Medium' | 'Low';
-  dateContext: string; // e.g., "2 days ago"
-}
-
 export interface NewsData {
-  items: NewsItem[];
+  content: string;
   sources: { title: string; uri: string }[];
 }
 
@@ -163,14 +155,12 @@ export interface NewsData {
  */
 export const fetchComplianceNews = async (): Promise<NewsData> => {
   const prompt = `
-    Find the 6 most significant news stories or regulatory updates regarding Corporate Compliance, GDPR/LGPD, Anti-Money Laundering (AML), AI Regulation, and Financial Risk from the last 7 days.
+    Find the significant news stories or regulatory updates regarding Corporate Compliance, GDPR/LGPD, Anti-Money Laundering (AML), AI Regulation, and Financial Risk from the last 7 days.
     
-    For each story, provide:
-    1. A catchy headline.
-    2. A short summary (max 2 sentences) suitable for an English learner.
-    3. The specific category (e.g., GDPR, AML, ESG, Cyber).
-    4. Impact level (High, Medium, Low).
-    5. Approximate date context (e.g. "Yesterday", "2 days ago").
+    Provide a comprehensive briefing covering these stories. 
+    Use clear headings for each topic.
+    Keep the language suitable for an English learner (professional but accessible).
+    Highlight the impact (High/Medium/Low) for each story.
   `;
 
   const response = await ai.models.generateContent({
@@ -178,26 +168,11 @@ export const fetchComplianceNews = async (): Promise<NewsData> => {
     contents: prompt,
     config: {
       tools: [{ googleSearch: {} }],
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.ARRAY,
-        items: {
-          type: Type.OBJECT,
-          properties: {
-            headline: { type: Type.STRING },
-            summary: { type: Type.STRING },
-            category: { type: Type.STRING },
-            impact: { type: Type.STRING, enum: ["High", "Medium", "Low"] },
-            dateContext: { type: Type.STRING }
-          },
-          required: ["headline", "summary", "category", "impact", "dateContext"]
-        }
-      }
+      // responseMimeType and responseSchema are NOT supported with googleSearch
     }
   });
 
-  const text = response.text;
-  const items = text ? JSON.parse(text) as NewsItem[] : [];
+  const content = response.text || "No recent news found.";
   
   // Extract web sources from grounding metadata
   const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
@@ -210,5 +185,5 @@ export const fetchComplianceNews = async (): Promise<NewsData> => {
   rawSources.forEach((s: any) => uniqueSourcesMap.set(s.uri, s));
   const sources = Array.from(uniqueSourcesMap.values()) as { title: string; uri: string }[];
 
-  return { items, sources };
+  return { content, sources };
 };
